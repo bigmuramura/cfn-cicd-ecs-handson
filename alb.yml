@@ -1,0 +1,42 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create ALB*1, TargetGroup*1, S3*1
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Common Settings
+        Parameters:
+          - ProjectName
+          - Environment
+
+Parameters:
+  ProjectName:
+    Description: Project Name
+    Type: String
+    Default: unnamed
+  Environment:
+    Description: Environment
+    Type: String
+    Default: dev
+    AllowedValues:
+      - prd
+      - dev
+      - stg
+
+Resources:
+  ELB1:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: application
+      Name: !Sub ${ProjectName}-${Environment}-alb
+      Scheme: internet-facing
+      SecurityGroups:
+        - Fn::ImportValue: !Sub ${ProjectName}-${Environment}-ALB-SG1
+      Subnets:
+        - Fn::ImportValue: !Sub ${ProjectName}-${Environment}-PublicSubnet1
+        - Fn::ImportValue: !Sub ${ProjectName}-${Environment}-PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-alb
